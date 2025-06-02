@@ -1,29 +1,32 @@
+/*
+	Name: Maksim Hristov
+	FN: 4MI0600466
+*/
+
 #pragma once
-#include "../utils/String.h"
-#include "fstream"
-#include "../files/FileHandler.h"
-#include "exception"
+#include "../Utils/String.h"
+#include "../FileHandlers/UserFileHandler.h"
+#include <stdint.h>
 
-class User {
-
-private:
-	String name;
-	String password;
-	bool _isLogged;
-	static FileHandler file;
-
-	void saveToFile();
-	User getUserFromFile() const;
-	int findFromFile(bool checkNameAndPassword);
-public:
-	User();
-	User(const String& name, const String& password);
-	void logIn();
-	void signUp();
-	void logOut();
-	bool isLogged() const;
-	friend bool operator==(const User& lhs, const User& rhs);
+enum class UserType:uint8_t {
+	Admin,
+	Client,
 };
 
-bool operator==(const User& lhs, const User& rhs);
-bool operator!=(const User& lhs, const User& rhs);
+class User {
+protected:
+	String name;
+	String hashedPassword;
+	unsigned id;
+	friend User* UserFileHandler::readUser();
+
+public:
+	User() = default;
+	User(const String& name, const String& password, int idCounter);
+	
+	virtual UserType getRole() const = 0;
+	virtual User* clone() const = 0;
+	const String& getName() const;
+	const String& getHashedPassword() const;
+	unsigned getId() const;
+};

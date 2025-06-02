@@ -1,12 +1,13 @@
-#include <iostream>
-#include "users/User.h"
-#include "files/FileHandler.h"
+/*
+	Name: Maksim Hristov
+	FN: 4MI0600466
+*/
+
+#include "./Components/CommandHandler/CommandHandler.h"
 
 int main() {
-	User max("Gosho", "8989");
-	max.signUp();
-	// max.logIn();
-	std::cout << max.isLogged();
+	CommandHandler c;
+	c.start();
 
 	return 0;
 }

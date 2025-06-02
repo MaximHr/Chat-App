@@ -1,7 +1,12 @@
+/*
+	Name: Maksim Hristov
+	FN: 4MI0600466
+*/
+
 #include "String.h"
 
 namespace {
-	unsigned defaultCapacity = 8;
+	const unsigned defaultCapacity = 8;
 	unsigned resizeFactor = 2;
 
 	unsigned calculateStringCapacity(unsigned n) {
@@ -143,9 +148,10 @@ bool String::isEmpty() const {
 
 std::istream& operator>>(std::istream& input, String& str) {
 	char buffer[1024];
-	input >> buffer;
+	input.getline(buffer, 1024);
 	str = String(buffer);
-
+	str = str.trim();
+	
 	return input;
 }
 

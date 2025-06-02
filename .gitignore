@@ -1,4 +1,6 @@
-# Ignore everything
-*.exe
-.vscode
-*.dat
+*
+
+!*.h
+!*.cpp
+
+!*/
