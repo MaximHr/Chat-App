@@ -6,6 +6,7 @@
 #pragma once
 #include "../Utils/Config.h"
 #include "FileHandler.h"
+#include "FileFactory.h"
 #include "../Utils/String.h"
 #include <exception>
 #include <iostream>
@@ -17,19 +18,20 @@ enum class FindType {
 	byName,
 };
 
-class UserFileHandler: public FileHandler {
+class UserFileHandler {
 private:
 	User* getUserMatcher(unsigned id, const String& hashedPassword, bool shouldCheckForPassword);
 	int findUserMatcher(unsigned id, const String& hashedPassword, const String& name, FindType findType);
 	void updateUserMatcher(unsigned id, const User* updatedUser);
-
+	
 	UserFileHandler(const String& str);
 	UserFileHandler(const UserFileHandler& other) = delete;
+	UserFileHandler() = delete;
 	UserFileHandler& operator=(const UserFileHandler& other) = delete;
 public:
+	FileHandler* fileHandler; 
 	static UserFileHandler& getInstance(const String& str);
-	~UserFileHandler() = default;
-	UserFileHandler() = delete;
+	~UserFileHandler();
 
 	void saveUser(const User* user, FileHandler& fs);
 	User* readUser();

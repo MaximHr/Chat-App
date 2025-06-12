@@ -14,36 +14,44 @@ void IdContainer::copyFrom(const IdContainer& other) {
 }
 
 void IdContainer::loadLargestIds() {
-	if(fileHandler.getFileSize() == 0) return;
-	int index = fileHandler.file.tellg();
-	fileHandler.file.seekg(0);
+	if(fileHandler->getFileSize() == 0) return;
+	int index = fileHandler->file.tellg();
+	fileHandler->file.seekg(0);
 
 	for(int i = 0;i < length;i++) {
-		fileHandler.read(idCreators[i].tableName);
-		fileHandler.file.read((char*)& idCreators[i].idCounter, sizeof(unsigned));
+		fileHandler->read(idCreators[i].tableName);
+		fileHandler->read(idCreators[i].idCounter);
 	}
-	fileHandler.file.seekg(index);
+	fileHandler->file.seekg(index);
 }
 
 void IdContainer::saveIdCounters() {
-	FileHandler ofs(Config::getFile(3).c_str());
-	if(!ofs.isOpen()) throw std::runtime_error("Failed to open temporary file for writing");
+	FileHandler* ofs = FileFactory::createFileHandler(Config::fileExtension);
+	ofs->open(Config::getFile(3).c_str());
+
+	if(!ofs->isOpen()) throw std::runtime_error("Failed to open temporary file for writing");
 
 	for(int i = 0;i < length;i++) {
-		ofs.write(idCreators[i].tableName);
-		ofs.file.write((const char *)& idCreators[i].idCounter, sizeof(unsigned));
+		ofs->write(idCreators[i].tableName);
+		ofs->write(idCreators[i].idCounter);
 	}
-	ofs.close();
-	fileHandler.changeFile(Config::getFile(3).c_str(), Config::getFile(1).c_str());
+	
+	delete ofs;
+	fileHandler->changeFile(Config::getFile(3).c_str(), Config::getFile(1).c_str());
 }
 
 void IdContainer::free() {
+	delete fileHandler;
 	delete[] idCreators;
 	length = 0;
 }
 
-IdContainer::IdContainer(const String& fileName, const String* names, int length) : fileHandler(fileName) {
+IdContainer::IdContainer(const String& fileName, const String* names, int length) {
 	if(names == nullptr) throw std::invalid_argument("argument can not be null pointer");
+	
+	fileHandler = FileFactory::createFileHandler(Config::fileExtension);
+	fileHandler->open(fileName);
+
 	this->length = length;
 	idCreators = new IdCreator[length];
 	for(int i = 0;i < length;i++) {

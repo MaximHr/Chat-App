@@ -12,9 +12,8 @@ enum class FileExtension {
 };
 
 class Config {
-	static const FileExtension fileExtension;
-
 public:
+	static const FileExtension fileExtension;
 	static const unsigned adminId;
 	static const String adminPassword;
 

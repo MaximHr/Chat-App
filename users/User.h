@@ -8,7 +8,7 @@
 #include "../FileHandlers/UserFileHandler.h"
 #include <stdint.h>
 
-enum class UserType:uint8_t {
+enum class UserType : unsigned {
 	Admin,
 	Client,
 };

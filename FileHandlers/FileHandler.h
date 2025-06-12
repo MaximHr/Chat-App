@@ -13,16 +13,18 @@ public:
 	std::fstream file;
 
 	FileHandler() = default;
-	FileHandler(const String& str);
-	~FileHandler();
+	virtual ~FileHandler();
 
-	void open(const String& str);
-	void close();
-	void write(const String& str);
-	void read(String& str);
-	void copyBytes(std::fstream& output, int bytes);
+	virtual void open(const String& str) = 0;
+	virtual void write(const String& str) = 0;
+	virtual void write(unsigned id) = 0;
+	virtual void read(String& str) = 0;
+	virtual void read(unsigned& id) = 0;
+	virtual void copyBytes(std::fstream& output, int bytes) = 0;
+
 	void changeFile(const char* strFrom, const char* strTo);
 	bool isOpen() const;
+	void close();
 	int getFileSize();
 	int setAtBeginning();
 };

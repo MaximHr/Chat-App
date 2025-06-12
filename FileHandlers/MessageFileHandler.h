@@ -6,6 +6,7 @@
 #pragma once
 #include "../Utils/String.h"
 #include "FileHandler.h"
+#include "FileFactory.h"
 class Message;
 
 enum class MessageExecutionType {
@@ -13,14 +14,16 @@ enum class MessageExecutionType {
 
 };
 
-class MessageFileHandler : public FileHandler {
-	MessageFileHandler(const String& str);
+class MessageFileHandler {
 	MessageFileHandler(const MessageFileHandler& other) = delete;
 	MessageFileHandler& operator=(const MessageFileHandler& other) = delete;
-public:
-	static MessageFileHandler& getInstance(const String& str);
-	~MessageFileHandler() = default;
 	MessageFileHandler() = delete;
+	MessageFileHandler(const String& str);
+	
+public:
+	FileHandler* fileHandler; 
+	static MessageFileHandler& getInstance(const String& str);
+	~MessageFileHandler();
 
 	void saveMessage(const Message& message, FileHandler& fs);
 	void printMessages(unsigned recieverId);

@@ -8,9 +8,10 @@
 #include <iostream>
 #include "../FileHandlers/FileHandler.h"
 #include "../Utils/Config.h"
+#include "../FileHandlers/FileFactory.h"
 
 class IdContainer {
-	FileHandler fileHandler;
+	FileHandler* fileHandler;
 	IdCreator* idCreators;
 	int length;
 	void copyFrom(const IdContainer& other);

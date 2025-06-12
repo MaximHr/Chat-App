@@ -6,11 +6,19 @@
 #include "MessageFileHandler.h"
 #include "../Components/Message/Message.h"
 
-MessageFileHandler::MessageFileHandler(const String& str) : FileHandler(str) { }
-
 MessageFileHandler& MessageFileHandler::getInstance(const String& str) {
 	static MessageFileHandler instance(str);
+
 	return instance;
+}
+
+MessageFileHandler::MessageFileHandler(const String& str) {
+	fileHandler = FileFactory::createFileHandler(Config::fileExtension);
+	fileHandler->open(str);
+}
+
+MessageFileHandler::~MessageFileHandler() {
+	delete fileHandler;
 }
 
 void MessageFileHandler::saveMessage(const Message& message, FileHandler& fs) {
@@ -20,49 +28,52 @@ void MessageFileHandler::saveMessage(const Message& message, FileHandler& fs) {
 	unsigned recieverId = message.getRecieverId();
 	unsigned senderId = message.getSenderId();
 
-	fs.file.write((const char *)& id, sizeof(id));
-	fs.file.write((const char *)& recieverId, sizeof(recieverId));
-	fs.file.write((const char *)& senderId, sizeof(senderId));
+	fs.write(id);
+	fs.write(recieverId);
+	fs.write(senderId);
 	fs.write(message.getText());
 	fs.write(message.getFormattedTime());
 }
 
 void MessageFileHandler::deleteMessages(unsigned recieverId) {
-	std::fstream output(Config::getFile(3).c_str(), std::ios::binary | std::ios::out);
-	if(!output.is_open()) throw std::runtime_error("Failed to open temporary file for writing");
+	FileHandler* output = FileFactory::createFileHandler(Config::fileExtension);
+	output->open(Config::getFile(3).c_str());
 
-	int index = setAtBeginning();
+	if(!output->isOpen()) throw std::runtime_error("Failed to open temporary file for writing");
+
+	int index = fileHandler->setAtBeginning();
 	int bytes = 0;
 	Message* message = readMessage(bytes);
 
-	while(file) {
+	while(fileHandler->file) {
 		if(message->getRecieverId() != recieverId) {
-			copyBytes(output, bytes);
+			fileHandler->copyBytes(output->file, bytes);
 		};
 		delete message;
 		message = readMessage(bytes);
 	}
 
-	output.close();
-	changeFile(Config::getFile(3).c_str(), Config::getFile(2).c_str());
-	if(index < getFileSize()) {
-		file.seekg(index);
+	delete output;
+
+	fileHandler->changeFile(Config::getFile(3).c_str(), Config::getFile(2).c_str());
+	if(index < fileHandler->getFileSize()) {
+		fileHandler->file.seekg(index);
 	}
 	delete message;
 }
 
 void MessageFileHandler::printMessages(unsigned recieverId) {
-	if(!isOpen()) throw std::runtime_error("file cannot be opened");
-	if(getFileSize() == 0) {
+	if(!fileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
+	if(fileHandler->getFileSize() == 0) {
 		std::cout << "There are no messages yet." << '\n';
 		return;
 	};
 
-	int index = setAtBeginning();
+	int index = fileHandler->setAtBeginning();
 	Message* message = readMessage();
 	bool containsSubmissions = false;
 	
-	while(!file.eof()) {
+	while(!fileHandler->file.eof()) {
 		if(message->getRecieverId() == recieverId) {
 			containsSubmissions = true;
 			std::cout << *message;
@@ -74,54 +85,54 @@ void MessageFileHandler::printMessages(unsigned recieverId) {
 		std::cout << "There are no messages yet." << '\n';
 	}
 
-	file.clear();
-	file.seekg(index);
+	fileHandler->file.clear();
+	fileHandler->file.seekg(index);
 	delete message;
 }
 
 int MessageFileHandler::findMessage(unsigned id) {
-	if(!isOpen()) throw std::runtime_error("file cannot be opened");
-	if(getFileSize() == 0) return -1;
+	if(!fileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
+	if(fileHandler->getFileSize() == 0) return -1;
 
-	int index = setAtBeginning();
+	int index = fileHandler->setAtBeginning();
 	Message* message = readMessage();
 	int result = 0;
 
 	while(message->getId() != id) {
-		if(!file) {
-			file.clear();
+		if(!fileHandler->file) {
+			fileHandler->file.clear();
 			delete message;
 			return -1;
 		}
-		result = file.tellg();
+		result = fileHandler->file.tellg();
 		delete message;
 		message = readMessage();
 	}
 
-	file.clear();
-	file.seekg(index);
+	fileHandler->file.clear();
+	fileHandler->file.seekg(index);
 	delete message;
 
 	return result;
 }
 
 Message* MessageFileHandler::readMessage() {
-	if(!isOpen()) throw std::runtime_error("file can not be opened");
+	if(!fileHandler->isOpen()) throw std::runtime_error("file can not be opened");
 
 	Message* message = new Message();
-	file.read((char *)& message->id, sizeof(message->id));
-	file.read((char *)& message->recieverId, sizeof(message->recieverId));
-	file.read((char *)& message->senderId, sizeof(message->senderId));
-	read(message->text);
-	read(message->formattedTime);
+	fileHandler->read(message->id);
+	fileHandler->read(message->recieverId);
+	fileHandler->read(message->senderId);
+	fileHandler->read(message->text);
+	fileHandler->read(message->formattedTime);
 
 	return message;
 }
 
 Message* MessageFileHandler::readMessage(int& bytes) {
-	int start = file.tellg();
+	int start = fileHandler->file.tellg();
 	Message* message = readMessage();
-	bytes = (int)file.tellg() - start;
+	bytes = (int)(fileHandler->file.tellg()) - start;
 
 	return message;
 }

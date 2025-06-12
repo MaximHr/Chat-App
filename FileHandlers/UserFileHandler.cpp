@@ -14,8 +14,13 @@ UserFileHandler& UserFileHandler::getInstance(const String& str) {
 	return instance;
 }
 
-UserFileHandler::UserFileHandler(const String& str) : FileHandler(str) {
+UserFileHandler::~UserFileHandler() {
+	delete fileHandler;
+}
 
+UserFileHandler::UserFileHandler(const String& str) {
+	fileHandler = FileFactory::createFileHandler(Config::fileExtension);
+	fileHandler->open(str);
 }
 
 void UserFileHandler::saveUser(const User* user, FileHandler& fs) {
@@ -23,22 +28,23 @@ void UserFileHandler::saveUser(const User* user, FileHandler& fs) {
 	if(!fs.isOpen()) throw std::runtime_error("file can not be opened");
 	UserType type = user->getRole();
 
-	fs.file.write((const char*)& type, sizeof(UserType));
+	fs.write((unsigned) type);
 	fs.write(user->getName());
 	fs.write(user->getHashedPassword());
 	unsigned id = user->getId();
-	fs.file.write((const char*)& id, sizeof(unsigned));
+	fs.write(id);
 	fs.file.flush();
 }
 
 User* UserFileHandler::readUser() {
 	UserType role;
-
-	file.read((char*)& role, sizeof(UserType));
+	
+	fileHandler->read((unsigned&) role);
 	User* newUser = UserFactory::createUser(role);
-	read(newUser->name);
-	read(newUser->hashedPassword);
-	file.read((char*)& newUser->id, sizeof(unsigned));
+
+	fileHandler->read(newUser->name);
+	fileHandler->read(newUser->hashedPassword);
+	fileHandler->read(newUser->id);
 
 	return newUser;
 }
@@ -54,10 +60,10 @@ User* UserFileHandler::getUserMatcher(unsigned id, const String& hashedPassword,
 		throw std::runtime_error("User was not found.");
 	}
 
-	int current = file.tellg();
-	file.seekg(pos);
+	int current = fileHandler->file.tellg();
+	fileHandler->file.seekg(pos);
 	User* user = readUser();
-	file.seekg(current);
+	fileHandler->file.seekg(current);
 	return user;
 }
 
@@ -70,9 +76,9 @@ User* UserFileHandler::getUserByPassword(unsigned id, const String& hashedPasswo
 }
 
 User* UserFileHandler::readUser(int& sizeInBytes) {
-	int start = file.tellg();
+	int start = fileHandler->file.tellg();
 	User* user = readUser();
-	sizeInBytes = (int)file.tellg() - start;
+	sizeInBytes = (int)(fileHandler->file.tellg()) - start;
 
 	return user;
 }
@@ -90,10 +96,10 @@ int UserFileHandler::findUserByName(const String& name) {
 }
 
 int UserFileHandler::findUserMatcher(unsigned id, const String& hashedPassword, const String& name, FindType findType) {
-	if(!isOpen()) throw std::runtime_error("file cannot be opened");
-	if(getFileSize() == 0) return -1;
+	if(!fileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
+	if(fileHandler->getFileSize() == 0) return -1;
 
-	int index = setAtBeginning();
+	int index = fileHandler->setAtBeginning();
 	User* tempUser = readUser();
 	int result = 0;
 
@@ -102,18 +108,18 @@ int UserFileHandler::findUserMatcher(unsigned id, const String& hashedPassword, 
 		|| (findType == FindType::byId && (tempUser->getId() != id))
 		|| (findType == FindType::byName && (tempUser->getName() != name)))
 	{
-		if(file.eof()) {
-			file.clear();
+		if(fileHandler->file.eof()) {
+			fileHandler->file.clear();
 			delete tempUser;
 			return -1;
 		}
-		result = file.tellg();
+		result = fileHandler->file.tellg();
 		delete tempUser;
 		tempUser = readUser();
 	}
 
-	file.clear();
-	file.seekg(index);
+	fileHandler->file.clear();
+	fileHandler->file.seekg(index);
 	delete tempUser;
 	return result;
 }
@@ -127,29 +133,32 @@ void UserFileHandler::updateUser(unsigned id, const User* updatedUser) {
 }
 
 void UserFileHandler::updateUserMatcher(unsigned id, const User* updatedUser) {
-	FileHandler output(Config::getFile(3).c_str());
-	if(!output.isOpen()) throw std::runtime_error("Failed to open temporary file for writing");
+	FileHandler* output = FileFactory::createFileHandler(Config::fileExtension);
+	output->open(Config::getFile(3).c_str());
 
-	int index = setAtBeginning();
+	if(!output->isOpen()) throw std::runtime_error("Failed to open temporary file for writing");
+
+	int index = fileHandler->setAtBeginning();
 	int bytes = 0;
 	User* tempUser = readUser(bytes);
 
-	while(file) {
+	while(fileHandler->file) {
 		if(tempUser->getId() != id) {
-			copyBytes(output.file, bytes);
+			fileHandler->copyBytes(output->file, bytes);
 		} else {
 			if(updatedUser != nullptr) {
-				saveUser(updatedUser, output);
+				saveUser(updatedUser, *output);
 			}
 		}
 		delete tempUser;
 		tempUser = readUser(bytes);
 	}
 
-	output.close();
-	changeFile(Config::getFile(3).c_str(), Config::getFile(0).c_str());
-	if(index < getFileSize()) {
-		file.seekg(index);
+	delete output;
+
+	fileHandler->changeFile(Config::getFile(3).c_str(), Config::getFile(0).c_str());
+	if(index < fileHandler->getFileSize()) {
+		fileHandler->file.seekg(index);
 	}
 	delete tempUser;
 }

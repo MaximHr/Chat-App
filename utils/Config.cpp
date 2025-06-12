@@ -1,3 +1,8 @@
+/*
+	Name: Maksim Hristov
+	FN: 4MI0600466
+*/
+
 #include "Config.h"
 
 const unsigned Config::adminId = 0;

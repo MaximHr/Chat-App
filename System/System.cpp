@@ -25,7 +25,7 @@ unsigned System::addUser(UserType type, const String& name, const String& passwo
 	unsigned id = idContainer.getId(Config::getFile(0));
 	User* newUser = UserFactory::createUser(type, name, password, id);
 
-	userFileHandler.saveUser(newUser, userFileHandler);
+	userFileHandler.saveUser(newUser, *userFileHandler.fileHandler);
 	idContainer.increment(Config::getFile(0));
 	delete newUser;
 
@@ -42,10 +42,10 @@ void System::deleteUser(unsigned id) {
 	verifier.requireAdmin(user);
 	verifier.requireNotAdmin(id);
 	
-	int fileSize = userFileHandler.getFileSize();
+	int fileSize = userFileHandler.fileHandler->getFileSize();
 	userFileHandler.deleteUser(id);
 	
-	if(fileSize != userFileHandler.getFileSize()) {
+	if(fileSize != userFileHandler.fileHandler->getFileSize()) {
 		std::cout << "User deleted succefully!" << '\n';
 	} else {
 		std::cout << "No user with that id found. " << '\n';
