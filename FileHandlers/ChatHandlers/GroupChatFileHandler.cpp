@@ -246,9 +246,7 @@ int GroupChatFileHandler::findMember(unsigned chatId, unsigned searchedId) {
 	} while(true);
 
 	membersFileHandler->file.clear();
-	if(index < membersFileHandler->getFileSize()) {
-		membersFileHandler->file.seekg(index);
-	}
+	membersFileHandler->file.seekg(index);
 }
 	
 void GroupChatFileHandler::addMember(unsigned chatId, unsigned memberId) {
@@ -273,4 +271,29 @@ void GroupChatFileHandler::saveMembers(const GroupChat& chat, FileHandler& fs , 
 		fs.write(memberIds[i]);
 	}
 	fs.file.flush();
+}
+
+void GroupChatFileHandler::printChats(bool shouldViewAllChats, unsigned userId) {
+	if(!chatFileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
+	if(chatFileHandler->getFileSize() == 0)  {
+		std::cout << "No group chats yet" << '\n';
+	};
+
+	int index = chatFileHandler->setAtBeginning();
+	GroupChat chat = readChat();
+	while (!chatFileHandler->file.eof())
+	{
+		if(shouldViewAllChats) {
+			std::cout << "Group chat "<< chat.getName() << " (" << chat.getMembersCount() << " members)" << '\n';
+		} else {
+			int pos = findMember(chat.getId(), userId);
+			if(pos != -1) {
+				std::cout << "Group chat "<< chat.getName() << " (" << chat.getMembersCount() << " members)" << '\n';
+			}
+		}
+		chat = readChat();
+	}
+
+	chatFileHandler->file.clear();
+	chatFileHandler->file.seekg(index);
 }

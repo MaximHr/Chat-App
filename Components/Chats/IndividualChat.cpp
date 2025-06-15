@@ -1,5 +1,9 @@
-#include "IndividualChat.h"
+/*
+	Name: Maksim Hristov
+	FN: 4MI0600466
+*/
 
+#include "IndividualChat.h"
 
 IndividualChat::IndividualChat(unsigned id, unsigned arr[2]) : BaseChat(id, 2, 0) {
 	usersIds[0] = arr[0];

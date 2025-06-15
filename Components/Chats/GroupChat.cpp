@@ -1,3 +1,8 @@
+/*
+	Name: Maksim Hristov
+	FN: 4MI0600466
+*/
+
 #include "GroupChat.h"
 
 GroupChat::GroupChat(const String& name, unsigned adminId, unsigned id, unsigned membersCount) : 

@@ -212,11 +212,16 @@ void System::sendIndividualMessage(unsigned chatId, const String& messageText) {
 void System::viewAllChats() {
 	verifier.requireLogged(user);
 	verifier.requireAdmin(user);
-	
+
+	groupChatFileHandler.printChats(true, 0);
+	individualChatFileHandler.printChats(true, 0);
 }
 
 void System::viewChats() {
 	verifier.requireLogged(user);
+
+	groupChatFileHandler.printChats(false, user->getId());
+	individualChatFileHandler.printChats(false, user->getId());
 }
 
 System::~System() {

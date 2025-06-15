@@ -1,3 +1,8 @@
+/*
+	Name: Maksim Hristov
+	FN: 4MI0600466
+*/
+
 #include "IndividualChatFileHandler.h"
 #include "../../Components/Chats/IndividualChat.h"
 
@@ -28,7 +33,7 @@ void IndividualChatFileHandler::saveChat(const IndividualChat& chat, FileHandler
 }
 	
 int IndividualChatFileHandler::findChatMatcher(unsigned user1Id, unsigned user2Id, bool shouldGetId) {
-if(!fileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
+	if(!fileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
 	if(fileHandler->getFileSize() == 0) return -1;
 
 	int index = fileHandler->setAtBeginning();
@@ -76,4 +81,28 @@ IndividualChat IndividualChatFileHandler::readChat() {
 	fileHandler->read(chat.messagesCount);
 
 	return chat;
+}
+
+void IndividualChatFileHandler::printChats(bool shouldViewAllChats, unsigned userId) {
+	if(!fileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
+	if(fileHandler->getFileSize() == 0) {
+		std::cout << "no individual chats yet" << '\n';
+	};
+
+	int index = fileHandler->setAtBeginning();
+	IndividualChat chat = readChat();
+
+	while(!fileHandler->file.eof()) {
+		if(shouldViewAllChats) {
+			std::cout << "individual chat with id of " << chat.getId() << '\n';
+		} else {
+			if(userId == chat.getUsersIds()[0] || userId == chat.getUsersIds()[1]) {
+				std::cout << "individual chat with id of " << chat.getId() << '\n';
+			}
+		}
+		chat = readChat();
+	}
+
+	fileHandler->file.clear();
+	fileHandler->file.seekg(index);
 }

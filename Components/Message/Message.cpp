@@ -40,6 +40,5 @@ void Message::setTime() {
 
 std::ostream& operator<<(std::ostream& output, const Message& message) {
 	output << message.getFormattedTime() << "Id " << message.getSenderId() << " : " << message.getText() << "\n______________________\n";
-				 
 	return output;
 }

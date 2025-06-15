@@ -4,6 +4,7 @@
 */
 
 #pragma once
+#include <iostream>
 #include "../FileHandler.h"
 #include "../FileFactory.h"
 #include "../../Utils/Config.h"
@@ -61,5 +62,6 @@ public:
 	int findMember(unsigned chatId, unsigned memberId);
 	void deleteGroupMembers(unsigned chatId);
 	void updateMessagesCount(unsigned chatId);
+	void printChats(bool shouldViewAllChats, unsigned userId);
 
 };

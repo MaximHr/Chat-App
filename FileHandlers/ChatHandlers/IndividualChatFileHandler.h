@@ -8,6 +8,7 @@
 #include "../FileFactory.h"
 #include "../../Utils/Config.h"
 #include "../MessageHandler/MessageFileHandler.h"
+#include <iostream>
 class IndividualChat;
 
 class IndividualChatFileHandler {
@@ -28,4 +29,6 @@ public:
 	int findChat(unsigned user1Id, unsigned user2Id);
 	int getChatId(unsigned user1Id, unsigned user2Id);
 	IndividualChat readChat();
+	void printChats(bool shouldViewAllChats, unsigned userId);
+	
 };

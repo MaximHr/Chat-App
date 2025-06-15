@@ -1,3 +1,8 @@
+/*
+	Name: Maksim Hristov
+	FN: 4MI0600466
+*/
+
 #include "BaseChat.h"
 
 BaseChat::BaseChat(unsigned id, unsigned membersCount, unsigned messagesCount) : 

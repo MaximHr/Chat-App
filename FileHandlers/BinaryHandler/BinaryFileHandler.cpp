@@ -67,7 +67,6 @@ void BinaryFileHandler::copyBytes(std::fstream& output, int bytes) {
 		output.write(buffer, currentChunk);
 		bytes -= currentChunk;
 	}
-
 }
 
 void BinaryFileHandler::skipIds(int bytes) {
