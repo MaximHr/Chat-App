@@ -86,7 +86,7 @@ int GroupChatFileHandler::findChat(unsigned chatId) {
 	return result;
 }
 
-void GroupChatFileHandler::updateChatMatcher(unsigned id, unsigned adminId, bool shouldDeleteUser) {
+void GroupChatFileHandler::updateChatMatcher(unsigned id, unsigned adminId, GroupChatUpdates type, int value) {
 	FileHandler* output = FileFactory::createFileHandler(Config::fileExtension);
 	output->open(Config::getFile(3).c_str());
 
@@ -100,8 +100,11 @@ void GroupChatFileHandler::updateChatMatcher(unsigned id, unsigned adminId, bool
 		if(chat.getId() != id) {
 			chatFileHandler->copyBytes(output->file, bytes);
 		} else {
-			if(!shouldDeleteUser) {
+			if(type == GroupChatUpdates::changeAdmin) {
 				chat.setAdminId(adminId);
+				saveChat(chat, *output);
+			} else if(type == GroupChatUpdates::changeMembersCount) {
+				chat.incrementMembersCount(value);
 				saveChat(chat, *output);
 			}
 		}
@@ -116,8 +119,12 @@ void GroupChatFileHandler::updateChatMatcher(unsigned id, unsigned adminId, bool
 	}
 }
 
+void GroupChatFileHandler::changeGroupMembers(unsigned chatId, unsigned value) {
+	updateChatMatcher(chatId, 0, GroupChatUpdates::changeMembersCount, value);
+}
+
 void GroupChatFileHandler::deleteChat(unsigned chatId) {
-	updateChatMatcher(chatId, 0, true);
+	updateChatMatcher(chatId, 0, GroupChatUpdates::deleteUser, 0);
 }
 
 GroupChat GroupChatFileHandler::getChat(unsigned chatId) {
@@ -135,26 +142,128 @@ GroupChat GroupChatFileHandler::getChat(unsigned chatId) {
 }
 
 void GroupChatFileHandler::setGroupAdmin(unsigned chatId, unsigned newAdminId) {
-	updateChatMatcher(chatId, newAdminId, false);
+	updateChatMatcher(chatId, newAdminId, GroupChatUpdates::changeAdmin, 0);
 }
 
-void GroupChatFileHandler::addMember(const GroupChat& chat, unsigned memberId) {
-	const unsigned membersIds[1] = {memberId};
-	addMembers(chat, membersIds, 1);
+void GroupChatFileHandler::updateMembersMatcher(unsigned chatId, unsigned searchedId, GroupMemberUpdates type) {
+	FileHandler* output = FileFactory::createFileHandler(Config::fileExtension);
+	output->open(Config::getFile(3).c_str());
+
+	if(!output->isOpen()) throw std::runtime_error("Failed to open temporary file for writing");
+
+	int index = membersFileHandler->setAtBeginning();
+	MemberDetails memberDetails;
+
+	while (true) {
+		membersFileHandler->read(memberDetails.chatId);
+		if (!membersFileHandler->file) break; // Check stream state after read
+
+		membersFileHandler->read(memberDetails.membersCount);
+		if (!membersFileHandler->file) break;
+
+		if (memberDetails.chatId == chatId) {
+			if (type != GroupMemberUpdates::deleteChatMembers) {
+				output->write(memberDetails.chatId);
+			} else {
+				membersFileHandler->skipIds(sizeof(unsigned) * memberDetails.membersCount);
+			}
+			if (type == GroupMemberUpdates::deleteMember) {
+				output->write(memberDetails.membersCount - 1);
+				for (int i = 0; i < memberDetails.membersCount; i++) {
+					unsigned memberId;
+					membersFileHandler->read(memberId);
+					if (!membersFileHandler->file) break;
+					if (memberId != searchedId) {
+						output->write(memberId);
+					}
+				}
+			}
+			if (type == GroupMemberUpdates::addMember) {
+				output->write(memberDetails.membersCount + 1);
+				for (int i = 0; i < memberDetails.membersCount; i++) {
+					unsigned memberId;
+					membersFileHandler->read(memberId);
+					if (!membersFileHandler->file) break;
+					output->write(memberId);
+				}
+				output->write(searchedId);
+			}
+		} else {
+			output->write(memberDetails.chatId);
+			output->write(memberDetails.membersCount);
+			for (int i = 0; i < memberDetails.membersCount; i++) {
+				unsigned memberId;
+				membersFileHandler->read(memberId);
+				if (!membersFileHandler->file) break;
+				output->write(memberId);
+			}
+		}
+	};
+
+	delete output;
+	membersFileHandler->file.clear();
+	membersFileHandler->changeFile(Config::getFile(3).c_str(), Config::getFile(6).c_str());
+	if(index < membersFileHandler->getFileSize()) {
+		membersFileHandler->file.seekg(index);
+	}
+}
+
+int GroupChatFileHandler::findMember(unsigned chatId, unsigned searchedId) {
+	if(!membersFileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
+	if(membersFileHandler->getFileSize() == 0) return -1;
+
+	int index = membersFileHandler->setAtBeginning();
+	int result = 0;
+	MemberDetails memberDetails;
+
+	do {
+		if(membersFileHandler->file.eof()) {
+			membersFileHandler->file.clear();
+			membersFileHandler->file.seekg(index);
+			return -1;
+		}
+		membersFileHandler->read(memberDetails.chatId);
+		membersFileHandler->read(memberDetails.membersCount);
+		if(memberDetails.chatId != chatId) {
+			membersFileHandler->skipIds(sizeof(unsigned) * memberDetails.membersCount);
+		} else {
+			for(int i = 0;i < memberDetails.membersCount;i++) {
+				unsigned memberId;
+				membersFileHandler->read(memberId);
+				if(searchedId == memberId) {
+					return i;
+				}
+			}
+		}
+		
+	} while(true);
+
+	membersFileHandler->file.clear();
+	if(index < membersFileHandler->getFileSize()) {
+		membersFileHandler->file.seekg(index);
+	}
+}
+	
+void GroupChatFileHandler::addMember(unsigned chatId, unsigned memberId) {
+	updateMembersMatcher(chatId, memberId, GroupMemberUpdates::addMember);
+	changeGroupMembers(chatId, +1);
 }
 
 void GroupChatFileHandler::deleteGroupMembers(unsigned chatId) {
-
+	updateMembersMatcher(chatId, 0, GroupMemberUpdates::deleteChatMembers);
 }
 
 void GroupChatFileHandler::deleteMember(unsigned chatId, unsigned memberId) {
-
+	updateMembersMatcher(chatId, memberId, GroupMemberUpdates::deleteMember);
+	changeGroupMembers(chatId, -1);
 }
 
-void GroupChatFileHandler::findMember(unsigned chatId, unsigned memberId) {
-
-}
-
-void GroupChatFileHandler::addMembers(const GroupChat& chat,const unsigned memberIds[], unsigned length) {
-
+void GroupChatFileHandler::saveMembers(const GroupChat& chat, FileHandler& fs , const unsigned memberIds[], unsigned length) {
+	if(!chatFileHandler->isOpen()) throw std::runtime_error("file can not be opened");
+	fs.write(chat.getId());
+	fs.write(length);
+	for(int i = 0;i < length;i++) {
+		fs.write(memberIds[i]);
+	}
+	fs.file.flush();
 }

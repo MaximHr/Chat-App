@@ -7,7 +7,9 @@
 
 SystemVerifier::SystemVerifier() : 
 	userFileHandler(UserFileHandler::getInstance(Config::getFile(0))) ,
-	groupChatFileHandler(GroupChatFileHandler::getInstance(Config::getFile(5)))
+	groupChatFileHandler(
+		GroupChatFileHandler::getInstance(Config::getFile(5), Config::getFile(6))
+	)
 { }
 
 void SystemVerifier::requireLogged(const User* user) const {
@@ -68,14 +70,30 @@ void SystemVerifier::requireUniqueMembers(const String names[], unsigned length)
 void SystemVerifier::requireChatAdmin(unsigned chatId, unsigned adminId) {
 	GroupChat chat = groupChatFileHandler.getChat(chatId);
 	if(chat.getAdminId() != adminId) {
-		throw std::runtime_error("Only the chat admin can change the chat admin");
+		throw std::runtime_error("Access denied. Only chat admins can perform this operation.");
+	}
+}
+
+void SystemVerifier::requireNotChatAdmin(unsigned chatId, unsigned adminId) {
+	GroupChat chat = groupChatFileHandler.getChat(chatId);
+	if(chat.getAdminId() == adminId) {
+		throw std::runtime_error("You can not leave this chat group, because you are the admin of the group. change the admin and then leave the group.");
 	}
 }
 
 void SystemVerifier::requireUserInChat(unsigned chatId, unsigned userId) {
-
+	int pos = groupChatFileHandler.findMember(chatId, userId);
+	if(pos == -1) {
+		throw std::runtime_error("User is not part of this chat");
+	}
 }
 
+void SystemVerifier::requireUserNotInChat(unsigned chatId, unsigned userId) {
+	int pos = groupChatFileHandler.findMember(chatId, userId);
+	if(pos != -1) {
+		throw std::runtime_error("User is part of this chat");
+	}
+}
 
 void SystemVerifier::requireUserInChatOrAdmin(unsigned chatId, const User* user) {
 	bool valid = true;

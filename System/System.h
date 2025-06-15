@@ -42,9 +42,15 @@ public:
 	void logout();
 	void changePassword(const String& password);
 	bool doesUserExist(const String& name);
-	void createGroup(const String& groupName, String members[], unsigned length);
+	unsigned createGroup(const String& groupName, String members[], unsigned length);
 	void messageIndividual(const String& name);
 	void setGroupAdmin(unsigned chatId, unsigned adminId);
 	void deleteGroup(unsigned chatId);
 	void showGroupStats(unsigned chatId);
+	void kickFromGroup(unsigned chatId, unsigned memberId);
+	void addToGroup(unsigned chatId, unsigned memberId);
+	void leaveGroup(unsigned chatId);
+	void viewAllChats();
+	void viewChats();
+
 };

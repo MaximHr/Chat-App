@@ -24,9 +24,6 @@ class CommandHandler {
 	void createGroup();
 	void messageIndividual();
 	void selectChat();
-	void viewAllChats();
-	void viewChats();
-
 public:
 	void start();
 	CommandHandler();

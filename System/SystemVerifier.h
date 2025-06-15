@@ -24,6 +24,8 @@ public:
 	void requireMinimumMembers(unsigned length) const;
 	void requireUniqueMembers(const String names[], unsigned length) const;
 	void requireChatAdmin(unsigned chatId, unsigned adminId);
+	void requireNotChatAdmin(unsigned chatId, unsigned adminId);
 	void requireUserInChat(unsigned chatId, unsigned userId);
 	void requireUserInChatOrAdmin(unsigned chatId, const User* user);
+	void requireUserNotInChat(unsigned chatId, unsigned userId);
 };

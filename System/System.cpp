@@ -79,7 +79,7 @@ bool System::doesUserExist(const String& name) {
 	return exists;
 }
 
-void System::createGroup(const String& groupName, String members[], unsigned length) {
+unsigned System::createGroup(const String& groupName, String members[], unsigned length) {
 	verifier.requireLogged(user);
 	verifier.requireMinimumMembers(length);
 
@@ -103,15 +103,17 @@ void System::createGroup(const String& groupName, String members[], unsigned len
 		membersIds[i] = currentMember->getId();
 		delete currentMember;
 	}
-	groupChatFileHandler.addMembers(chat, membersIds, length);
+	groupChatFileHandler.saveMembers(chat, *groupChatFileHandler.membersFileHandler, membersIds, length);
 
+	return chat.getId();
 }
 
 void System::showGroupStats(unsigned chatId) {
 	verifier.requireLogged(user);
 	verifier.requireUserInChatOrAdmin(chatId, user);
 	GroupChat chat = groupChatFileHandler.getChat(chatId);
-	std::cout << chat.getName() << ": " << '\n';
+	std::cout << "________________" << '\n';
+	std::cout << "Name: " << chat.getName() << " " << '\n';
 	std::cout << "Chat Id: " << chat.getId() << '\n';
 	std::cout << "Total members: " <<  chat.getMembersCount() << '\n';
 	std::cout << "Total messages:" << chat.getMessagesCount() << '\n';
@@ -128,21 +130,66 @@ void System::setGroupAdmin(unsigned chatId, unsigned adminId) {
 	verifier.requireLogged(user);
 	verifier.requireChatAdmin(chatId, user->getId());
 	verifier.requireUserInChat(chatId, adminId);
+
 	groupChatFileHandler.setGroupAdmin(chatId, adminId);
+}
+
+void System::kickFromGroup(unsigned chatId, unsigned memberId) {
+	verifier.requireLogged(user);
+	verifier.requireChatAdmin(chatId, user->getId());
+	verifier.requireUserInChat(chatId, memberId);
+
+	groupChatFileHandler.deleteMember(chatId, memberId);
+}
+
+void System::addToGroup(unsigned chatId, unsigned memberId) {
+	verifier.requireLogged(user);
+	verifier.requireChatAdmin(chatId, user->getId());
+	verifier.requireUserNotInChat(chatId, memberId);
+
+	groupChatFileHandler.addMember(chatId, memberId);
+}
+
+void System::leaveGroup(unsigned chatId) {
+	verifier.requireLogged(user);
+	verifier.requireUserInChat(chatId, user->getId());
+	verifier.requireNotChatAdmin(chatId, user->getId());
+
+	groupChatFileHandler.deleteMember(chatId, user->getId());
 }
 
 void System::messageIndividual(const String& name) {
 	verifier.requireLogged(user);
+	const String names[2] = {name, user->getName()};
+	verifier.requireUniqueMembers(names, 2);
+
 	User* reciever = userFileHandler.getUserByName(name);
-	// int pos = individualChatFileHandler.findChat(user->getName(), name);
-	// if(pos == -1) {
-	// 	IndividualChat chat = individualChatFileHandler.readChat();
-	// 	individualChatFileHandler.saveChat(chat, *chatDispatcher.fileHandler);
-	// } else {
-	// 	//printMessages and call enterMessage
-	// }
+
+	int pos = individualChatFileHandler.findChat(user->getId(), reciever->getId());
+	
+	//creates the chat if it doesnt exist
+	if(pos == -1) {
+		unsigned arr[2] = {user->getId(), reciever->getId()};
+		unsigned id = idContainer.getId(Config::getFile(4));
+		IndividualChat chat (
+			id, 
+			arr
+		);
+		individualChatFileHandler.saveChat(chat, *individualChatFileHandler.fileHandler);
+	};
 
 	delete reciever;
+	idContainer.increment(Config::getFile(4)); 
+}
+
+
+void System::viewAllChats() {
+	verifier.requireLogged(user);
+	verifier.requireAdmin(user);
+}
+
+void System::viewChats() {
+	verifier.requireLogged(user);
 }
 
 System::~System() {

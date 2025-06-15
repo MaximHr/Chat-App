@@ -58,9 +58,9 @@ void CommandHandler::callCommand(const String& str) {
 		} else if(command == "logout") {
 			system.logout();
 		} else if(command == "view_chats") {
-			viewChats();
+			system.viewChats();
 		} else if(command == "view_all_chats") {
-			viewAllChats();
+			system.viewAllChats();
 		} else if(command == "select_chat") {
 			selectChat();
 		} else if(command == "create_group") {
@@ -182,15 +182,25 @@ void CommandHandler::setGroupAdmin() {
 }
 
 void CommandHandler::kickFromGroup() {
-
+	std::cout << "Group chat id: ";
+	unsigned chatId = getValidInfo<unsigned>();
+	std::cout << "Member id: ";
+	unsigned memberId = getValidInfo<unsigned>();
+	system.kickFromGroup(chatId, memberId);
 }
 
 void CommandHandler::addToGroup() {
-
+	std::cout << "Group chat id: ";
+	unsigned chatId = getValidInfo<unsigned>();
+	std::cout << "Member id: ";
+	unsigned memberId = getValidInfo<unsigned>();
+	system.addToGroup(chatId, memberId);
 }
 
 void CommandHandler::leaveGroup() {
-
+	std::cout << "Group chat id: ";
+	unsigned chatId = getValidInfo<unsigned>();
+	system.leaveGroup(chatId);
 }
 
 void CommandHandler::messageIndividual() {
@@ -225,18 +235,10 @@ void CommandHandler::createGroup() {
 		}
 	} while(length <= Config::maxGroupMembers);
 
-	system.createGroup(name, members, length);
-	std::cout << "Group created successfully" << '\n';
+	unsigned id = system.createGroup(name, members, length);
+	std::cout << "Group created successfully with an id of " << id << '\n';
 }
 
 void CommandHandler::selectChat() {
-
-}
-
-void CommandHandler::viewAllChats() {
-
-}
-
-void CommandHandler::viewChats() {
 
 }

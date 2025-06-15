@@ -18,7 +18,7 @@ public:
 	GroupChat(const String& name, unsigned adminId, unsigned id, unsigned membersCount);
 	
 	ChatType getType() const override;
-	void incrementMembersCount();
+	void incrementMembersCount(int value);
 	unsigned getAdminId() const;
 	unsigned getMembersCount() const;
 	const String& getName() const;

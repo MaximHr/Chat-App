@@ -1,7 +1,7 @@
 #include "IndividualChat.h"
 
 
-IndividualChat::IndividualChat(unsigned , unsigned arr[2]) : BaseChat(id, 2, 0) {
+IndividualChat::IndividualChat(unsigned id, unsigned arr[2]) : BaseChat(id, 2, 0) {
 	usersIds[0] = arr[0];
 	usersIds[1] = arr[1];
 }

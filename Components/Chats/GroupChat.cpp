@@ -7,8 +7,8 @@ GroupChat::GroupChat(const String& name, unsigned adminId, unsigned id, unsigned
 	BaseChat(id, membersCount, 0) 
 { }
 
-void GroupChat::incrementMembersCount() {
-	membersCount++;
+void GroupChat::incrementMembersCount(int value) {
+	membersCount += value;
 }
 
 unsigned GroupChat::getAdminId() const {

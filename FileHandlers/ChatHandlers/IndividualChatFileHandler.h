@@ -19,5 +19,7 @@ public:
 	static IndividualChatFileHandler& getInstance(const String& str);
 	~IndividualChatFileHandler();
 
-	void saveChat(const IndividualChat& chat, FileHandler& fs);
+	void saveChat(const IndividualChat& chat, FileHandler& fs);	
+	int findChat(unsigned user1Id, unsigned user2Id);
+	IndividualChat readChat();
 };
