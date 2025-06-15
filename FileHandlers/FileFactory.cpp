@@ -4,8 +4,8 @@
 */
 
 #include "FileFactory.h"
-#include "BinaryFileHandler.h"
-#include "TextFileHandler.h"
+#include "BinaryHandler/BinaryFileHandler.h"
+#include "TextHandler/TextFileHandler.h"
 
 FileHandler* FileFactory::createFileHandler(FileExtension extension) {
 	switch(extension) {

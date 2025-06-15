@@ -4,9 +4,9 @@
 */
 
 #pragma once
-#include "../Utils/String.h"
-#include "FileHandler.h"
-#include "FileFactory.h"
+#include "../../Utils/String.h"
+#include "../FileHandler.h"
+#include "../FileFactory.h"
 class Message;
 
 enum class MessageExecutionType {

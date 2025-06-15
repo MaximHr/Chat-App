@@ -6,7 +6,8 @@
 #include "SystemVerifier.h"
 
 SystemVerifier::SystemVerifier() : 
-	userFileHandler(UserFileHandler::getInstance(Config::getFile(0))) 
+	userFileHandler(UserFileHandler::getInstance(Config::getFile(0))) ,
+	groupChatFileHandler(GroupChatFileHandler::getInstance(Config::getFile(5)))
 { }
 
 void SystemVerifier::requireLogged(const User* user) const {
@@ -45,5 +46,55 @@ void SystemVerifier::requireNotAdmin(unsigned id) {
 	if(searchedUser->getRole() == UserType::Admin) {
 		delete searchedUser;
 		throw std::runtime_error("Admin can not be deleted.");
+	}
+}
+
+void SystemVerifier::requireMinimumMembers(unsigned length) const {
+	if(length <= 2) {
+		throw std::runtime_error("You need to add at least 2 users in order to create a group");
+	}
+}
+
+void SystemVerifier::requireUniqueMembers(const String names[], unsigned length) const {
+	for(unsigned i = 0; i < length; ++i) {
+		for(unsigned j = i + 1; j < length; ++j) {
+			if(names[i] == names[j]) {
+				throw std::invalid_argument("Duplicate member names found!");
+			}
+		}
+	}
+}
+
+void SystemVerifier::requireChatAdmin(unsigned chatId, unsigned adminId) {
+	GroupChat chat = groupChatFileHandler.getChat(chatId);
+	if(chat.getAdminId() != adminId) {
+		throw std::runtime_error("Only the chat admin can change the chat admin");
+	}
+}
+
+void SystemVerifier::requireUserInChat(unsigned chatId, unsigned userId) {
+
+}
+
+
+void SystemVerifier::requireUserInChatOrAdmin(unsigned chatId, const User* user) {
+	bool valid = true;
+	try {
+		requireUserInChat(chatId, user->getId());
+	} catch (...) {
+		valid = false;
+	}
+
+	if(!valid) {
+		try {
+			requireAdmin(user);
+			valid = true;
+		} catch (...) {
+			valid = false;
+		}
+	}
+
+	if(!valid) {
+		throw std::runtime_error("Access denied.");
 	}
 }

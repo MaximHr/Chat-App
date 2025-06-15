@@ -18,8 +18,10 @@ public:
 	static const String adminPassword;
 
 	static const String getFileExtension();
-	static const int numberOfFiles = 4;
+	static const int numberOfFiles = 7;
 	static const String fileNames[numberOfFiles];
 	static const String getFile(unsigned i);
+
+	static const unsigned maxGroupMembers = 50;
 
 };

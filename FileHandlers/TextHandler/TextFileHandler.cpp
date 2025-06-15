@@ -72,3 +72,11 @@ void TextFileHandler::copyBytes(std::fstream& output, int bytes) {
 		bytes -= currentChunk;
 	}
 };
+
+void TextFileHandler::skipIds(int bytes) {
+	int times = bytes / sizeof(unsigned);
+	for(int i = 0;i < times;i++) {
+		unsigned id;
+		read((unsigned&) id);
+	}
+};

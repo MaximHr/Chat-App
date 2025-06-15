@@ -8,12 +8,15 @@
 const unsigned Config::adminId = 0;
 const String Config::adminPassword = "0000";
 
-const FileExtension Config::fileExtension = FileExtension::dat;
-const String Config::fileNames[] = {
+const FileExtension Config::fileExtension = FileExtension::txt;
+const String Config::fileNames[Config::numberOfFiles] = {
 	"users",
 	"ids",
 	"messages",
 	"temp",
+	"individual_chats",
+	"group_chats",
+	"group_members",
 };
 
 const String Config::getFileExtension() {

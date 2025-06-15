@@ -5,7 +5,7 @@
 
 #pragma once
 #include "../Utils/String.h"
-#include "../FileHandlers/UserFileHandler.h"
+#include "../FileHandlers/UserHandler/UserFileHandler.h"
 #include <stdint.h>
 
 enum class UserType : unsigned {

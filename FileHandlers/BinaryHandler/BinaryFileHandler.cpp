@@ -69,3 +69,7 @@ void BinaryFileHandler::copyBytes(std::fstream& output, int bytes) {
 	}
 
 }
+
+void BinaryFileHandler::skipIds(int bytes) {
+	file.seekg(bytes, std::ios::cur);
+}

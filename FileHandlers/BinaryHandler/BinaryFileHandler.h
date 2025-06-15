@@ -4,12 +4,11 @@
 */
 
 #pragma once
-#include "FileHandler.h"
+#include "../FileHandler.h"
 
-class TextFileHandler: public FileHandler {
-	const char delim = '|';
+class BinaryFileHandler: public FileHandler {
 public:
-	TextFileHandler() = default;
+	BinaryFileHandler() = default;
 
 	void open(const String& str) override;
 	void write(const String& str) override;
@@ -17,5 +16,5 @@ public:
 	void copyBytes(std::fstream& output, int bytes) override;
 	void read(unsigned& id) override;
 	void write(unsigned id) override;
-
+	void skipIds(int bytes) override;
 };

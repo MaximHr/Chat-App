@@ -20,6 +20,7 @@ public:
 	virtual void write(unsigned id) = 0;
 	virtual void read(String& str) = 0;
 	virtual void read(unsigned& id) = 0;
+	virtual void skipIds(int bytes) = 0;
 	virtual void copyBytes(std::fstream& output, int bytes) = 0;
 
 	void changeFile(const char* strFrom, const char* strTo);

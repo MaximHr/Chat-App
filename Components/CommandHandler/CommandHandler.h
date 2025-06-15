@@ -15,6 +15,17 @@ class CommandHandler {
 	void login();
 	void callCommand(const String& str);
 	void changePassword();
+	void deleteGroup();
+	void showGroupStats();
+	void setGroupAdmin();
+	void kickFromGroup();
+	void addToGroup();
+	void leaveGroup();
+	void createGroup();
+	void messageIndividual();
+	void selectChat();
+	void viewAllChats();
+	void viewChats();
 
 public:
 	void start();

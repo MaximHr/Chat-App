@@ -89,7 +89,7 @@ int IdContainer::findByName(const String& name) const {
 void IdContainer::increment(const String& name) {
 	int index = findByName(name);
 	if(index == -1) {
-		throw std::runtime_error("table name was not found");
+		throw std::runtime_error(" was not found");
 	}
 	idCreators[index].increment();
 	saveIdCounters();

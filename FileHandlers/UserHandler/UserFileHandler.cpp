@@ -4,10 +4,10 @@
 */
 
 #include "UserFileHandler.h"
-#include "../Users/User.h"
-#include "../Users/UserFactory.h"
-#include "../Utils/Config.h"
-#include "../System/System.h"
+#include "../../Users/User.h"
+#include "../../Users/UserFactory.h"
+#include "../../Utils/Config.h"
+#include "../../System/System.h"
 
 UserFileHandler& UserFileHandler::getInstance(const String& str) {
 	static UserFileHandler instance(str);
@@ -49,13 +49,23 @@ User* UserFileHandler::readUser() {
 	return newUser;
 }
 
-User* UserFileHandler::getUserMatcher(unsigned id, const String& hashedPassword, bool shouldCheckForPassword) {
+User* UserFileHandler::getUserMatcher(unsigned id, const String& hashedPassword, FindType type, const String& name) {
 	int pos = -1;
-	if(!shouldCheckForPassword) {
-		pos = findUser(id);
-	} else {
-		pos = findUserWithPassword(id, hashedPassword);
+	switch (type) {
+		case(FindType::byId) :
+			pos = findUser(id);
+			break;
+		case(FindType::byIdAndPassword) :
+			pos = findUserWithPassword(id, hashedPassword);
+			break;
+		case(FindType::byName) :
+			pos = findUserByName(name);
+			break;
+		default :
+			throw std::invalid_argument("invalid find type");
+			break;
 	}
+	
 	if(pos == -1)  {
 		throw std::runtime_error("User was not found.");
 	}
@@ -68,11 +78,15 @@ User* UserFileHandler::getUserMatcher(unsigned id, const String& hashedPassword,
 }
 
 User* UserFileHandler::getUser(unsigned id) {
-	return getUserMatcher(id, "", false);
+	return getUserMatcher(id, "", FindType::byId, "");
+}
+
+User* UserFileHandler::getUserByName(const String& name) {
+	return getUserMatcher(-1, "", FindType::byName, name);
 }
 
 User* UserFileHandler::getUserByPassword(unsigned id, const String& hashedPassword) {
-	return getUserMatcher(id, hashedPassword, true);
+	return getUserMatcher(id, hashedPassword, FindType::byIdAndPassword, "");
 }
 
 User* UserFileHandler::readUser(int& sizeInBytes) {

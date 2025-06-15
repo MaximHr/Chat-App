@@ -4,7 +4,7 @@
 */
 
 #include "MessageFileHandler.h"
-#include "../Components/Message/Message.h"
+#include "../../Components/Message/Message.h"
 
 MessageFileHandler& MessageFileHandler::getInstance(const String& str) {
 	static MessageFileHandler instance(str);

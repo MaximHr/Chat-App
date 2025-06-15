@@ -6,7 +6,7 @@
 #pragma once
 #include "../../Utils/String.h"
 #include "../../Users/User.h"
-#include "../../FileHandlers/MessageFileHandler.h"
+#include "../../FileHandlers/MessageHandler/MessageFileHandler.h"
 #include <iostream>
 #include <fstream>
 #include <ctime>

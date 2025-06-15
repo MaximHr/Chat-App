@@ -9,18 +9,24 @@
 #include "../Users/User.h"
 #include "../Users/UserFactory.h"
 #include "../IdManager/IdContainer.h"
-#include "../FileHandlers/UserFileHandler.h"
-#include "../FileHandlers/MessageFileHandler.h"
+#include "../FileHandlers/UserHandler/UserFileHandler.h"
+#include "../FileHandlers/MessageHandler/MessageFileHandler.h"
+#include "../FileHandlers/ChatHandlers/GroupChatFileHandler.h"
+#include "../FileHandlers/ChatHandlers/IndividualChatFileHandler.h"
 #include "SystemVerifier.h"
 #include "../Components/Message/Message.h"
+#include "../Components/Chats/GroupChat.h"
+#include "../Components/Chats/IndividualChat.h"
 #include <exception>
 
 class System {
 	User* user;
-	UserFileHandler& userFileHandler;
-	MessageFileHandler& messageFileHandler;
 	SystemVerifier verifier;
 	IdContainer idContainer;
+	GroupChatFileHandler& groupChatFileHandler;
+	IndividualChatFileHandler& individualChatFileHandler;
+	UserFileHandler& userFileHandler;
+	MessageFileHandler& messageFileHandler;
 	
 	System();
 	System(const System& other) = delete;
@@ -35,4 +41,10 @@ public:
 	void login(unsigned id, const String& password);
 	void logout();
 	void changePassword(const String& password);
+	bool doesUserExist(const String& name);
+	void createGroup(const String& groupName, String members[], unsigned length);
+	void messageIndividual(const String& name);
+	void setGroupAdmin(unsigned chatId, unsigned adminId);
+	void deleteGroup(unsigned chatId);
+	void showGroupStats(unsigned chatId);
 };

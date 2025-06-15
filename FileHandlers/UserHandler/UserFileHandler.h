@@ -4,10 +4,10 @@
 */
 
 #pragma once
-#include "../Utils/Config.h"
-#include "FileHandler.h"
-#include "FileFactory.h"
-#include "../Utils/String.h"
+#include "../../Utils/Config.h"
+#include "../FileHandler.h"
+#include "../FileFactory.h"
+#include "../../Utils/String.h"
 #include <exception>
 #include <iostream>
 class User;
@@ -20,7 +20,7 @@ enum class FindType {
 
 class UserFileHandler {
 private:
-	User* getUserMatcher(unsigned id, const String& hashedPassword, bool shouldCheckForPassword);
+	User* getUserMatcher(unsigned id, const String& hashedPassword, FindType type, const String& name);
 	int findUserMatcher(unsigned id, const String& hashedPassword, const String& name, FindType findType);
 	void updateUserMatcher(unsigned id, const User* updatedUser);
 	
@@ -37,6 +37,7 @@ public:
 	User* readUser();
 	User* readUser(int& sizeInBytes);
 	User* getUser(unsigned id);
+	User* getUserByName(const String& name);
 	User* getUserByPassword(unsigned id, const String& hashedPassword);
 	int findUser(unsigned id);
 	int findUserByName(const String& name);
