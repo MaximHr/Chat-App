@@ -26,7 +26,6 @@ class System {
 	GroupChatFileHandler& groupChatFileHandler;
 	IndividualChatFileHandler& individualChatFileHandler;
 	UserFileHandler& userFileHandler;
-	MessageFileHandler& messageFileHandler;
 	
 	System();
 	System(const System& other) = delete;
@@ -43,7 +42,7 @@ public:
 	void changePassword(const String& password);
 	bool doesUserExist(const String& name);
 	unsigned createGroup(const String& groupName, String members[], unsigned length);
-	void messageIndividual(const String& name);
+	unsigned messageIndividual(const String& name);
 	void setGroupAdmin(unsigned chatId, unsigned adminId);
 	void deleteGroup(unsigned chatId);
 	void showGroupStats(unsigned chatId);
@@ -52,5 +51,8 @@ public:
 	void leaveGroup(unsigned chatId);
 	void viewAllChats();
 	void viewChats();
+	void sendGroupMessage(unsigned chatId, const String& message);
+	void sendIndividualMessage(unsigned chatId, const String& message);
+	void printGroupMessages(unsigned chatId);
 
 };

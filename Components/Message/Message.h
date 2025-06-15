@@ -15,18 +15,18 @@ class Message {
 	String text;
 	String formattedTime;
 	unsigned id;
-	unsigned recieverId;
+	unsigned chatId;
 	unsigned senderId;
 	
 	friend Message* MessageFileHandler::readMessage();
 	void setTime();
 public:
 	Message() = default;
-	Message(unsigned id, const String& text, unsigned recieverId, unsigned senderId);
+	Message(unsigned id, const String& text, unsigned chatId, unsigned senderId);
 	const String& getText() const;
 	const String& getFormattedTime() const;
 	unsigned getSenderId() const;
-	unsigned getRecieverId() const;
+	unsigned getChatId() const;
 	unsigned getId() const;
 };
 

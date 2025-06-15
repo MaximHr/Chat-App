@@ -6,12 +6,6 @@
 #include "MessageFileHandler.h"
 #include "../../Components/Message/Message.h"
 
-MessageFileHandler& MessageFileHandler::getInstance(const String& str) {
-	static MessageFileHandler instance(str);
-
-	return instance;
-}
-
 MessageFileHandler::MessageFileHandler(const String& str) {
 	fileHandler = FileFactory::createFileHandler(Config::fileExtension);
 	fileHandler->open(str);
@@ -25,44 +19,18 @@ void MessageFileHandler::saveMessage(const Message& message, FileHandler& fs) {
 	if(!fs.isOpen()) throw std::runtime_error("file can not be opened");
 
 	unsigned id = message.getId();
-	unsigned recieverId = message.getRecieverId();
+	unsigned chatId = message.getChatId();
 	unsigned senderId = message.getSenderId();
 
 	fs.write(id);
-	fs.write(recieverId);
+	fs.write(chatId);
 	fs.write(senderId);
 	fs.write(message.getText());
 	fs.write(message.getFormattedTime());
+	fs.file.flush();
 }
 
-void MessageFileHandler::deleteMessages(unsigned recieverId) {
-	FileHandler* output = FileFactory::createFileHandler(Config::fileExtension);
-	output->open(Config::getFile(3).c_str());
-
-	if(!output->isOpen()) throw std::runtime_error("Failed to open temporary file for writing");
-
-	int index = fileHandler->setAtBeginning();
-	int bytes = 0;
-	Message* message = readMessage(bytes);
-
-	while(fileHandler->file) {
-		if(message->getRecieverId() != recieverId) {
-			fileHandler->copyBytes(output->file, bytes);
-		};
-		delete message;
-		message = readMessage(bytes);
-	}
-
-	delete output;
-
-	fileHandler->changeFile(Config::getFile(3).c_str(), Config::getFile(2).c_str());
-	if(index < fileHandler->getFileSize()) {
-		fileHandler->file.seekg(index);
-	}
-	delete message;
-}
-
-void MessageFileHandler::printMessages(unsigned recieverId) {
+void MessageFileHandler::printMessages(unsigned chatId) {
 	if(!fileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
 	if(fileHandler->getFileSize() == 0) {
 		std::cout << "There are no messages yet." << '\n';
@@ -74,7 +42,7 @@ void MessageFileHandler::printMessages(unsigned recieverId) {
 	bool containsSubmissions = false;
 	
 	while(!fileHandler->file.eof()) {
-		if(message->getRecieverId() == recieverId) {
+		if(message->getChatId() == chatId) {
 			containsSubmissions = true;
 			std::cout << *message;
 		}
@@ -121,7 +89,7 @@ Message* MessageFileHandler::readMessage() {
 
 	Message* message = new Message();
 	fileHandler->read(message->id);
-	fileHandler->read(message->recieverId);
+	fileHandler->read(message->chatId);
 	fileHandler->read(message->senderId);
 	fileHandler->read(message->text);
 	fileHandler->read(message->formattedTime);
@@ -136,17 +104,3 @@ Message* MessageFileHandler::readMessage(int& bytes) {
 
 	return message;
 }
-
-// Message* MessageFileHandler::getMessage(unsigned id) {
-// 	int pos = findMessage(id);
-// 	if(pos == -1)  {
-// 		throw std::runtime_error("Message with that id was not found");
-// 	}
-
-// 	int current = file.tellg();
-// 	file.seekg(pos);
-// 	Message* message = readMessage();
-// 	file.seekg(current);
-
-// 	return message;
-// }

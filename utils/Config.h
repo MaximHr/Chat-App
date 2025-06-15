@@ -18,7 +18,7 @@ public:
 	static const String adminPassword;
 
 	static const String getFileExtension();
-	static const int numberOfFiles = 7;
+	static const int numberOfFiles = 8;
 	static const String fileNames[numberOfFiles];
 	static const String getFile(unsigned i);
 

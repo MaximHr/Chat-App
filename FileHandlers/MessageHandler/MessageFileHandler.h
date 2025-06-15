@@ -15,15 +15,14 @@ enum class MessageExecutionType {
 };
 
 class MessageFileHandler {
-	MessageFileHandler(const MessageFileHandler& other) = delete;
-	MessageFileHandler& operator=(const MessageFileHandler& other) = delete;
-	MessageFileHandler() = delete;
-	MessageFileHandler(const String& str);
 	
 public:
 	FileHandler* fileHandler; 
-	static MessageFileHandler& getInstance(const String& str);
 	~MessageFileHandler();
+	MessageFileHandler(const MessageFileHandler& other) = delete;
+	MessageFileHandler& operator=(const MessageFileHandler& other) = delete;
+	MessageFileHandler() = default;
+	MessageFileHandler(const String& str);
 
 	void saveMessage(const Message& message, FileHandler& fs);
 	void printMessages(unsigned recieverId);

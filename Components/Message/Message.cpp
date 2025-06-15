@@ -5,8 +5,8 @@
 
 #include "Message.h"
 
-Message::Message(unsigned id, const String& text, unsigned recieverId, unsigned senderId) : 
-	id(id), text(text), recieverId(recieverId), senderId(senderId) 
+Message::Message(unsigned id, const String& text, unsigned chatId, unsigned senderId) : 
+	id(id), text(text), chatId(chatId), senderId(senderId) 
 {
 	setTime();
 }
@@ -19,8 +19,8 @@ unsigned Message::getSenderId() const {
 	return senderId;
 }
 
-unsigned Message::getRecieverId() const {
-	return recieverId;
+unsigned Message::getChatId() const {
+	return chatId;
 }
 
 unsigned Message::getId() const {
@@ -39,9 +39,7 @@ void Message::setTime() {
 }
 
 std::ostream& operator<<(std::ostream& output, const Message& message) {
-	output<< message.getFormattedTime() 
-				<< message.getText()
-				<< "\n______________________\n";
+	output << message.getFormattedTime() << "Id " << message.getSenderId() << " : " << message.getText() << "\n______________________\n";
 				 
 	return output;
 }

@@ -7,13 +7,15 @@
 #include "../FileHandler.h"
 #include "../FileFactory.h"
 #include "../../Utils/Config.h"
+#include "../MessageHandler/MessageFileHandler.h"
 
 class GroupChat;
 
 enum class GroupChatUpdates {
 	deleteUser,
 	changeAdmin,
-	changeMembersCount
+	changeMembersCount,
+	changeMessagesCount
 };
 
 enum class GroupMemberUpdates {
@@ -36,7 +38,9 @@ class GroupChatFileHandler {
 	void updateChatMatcher(unsigned id, unsigned adminId, GroupChatUpdates type, int value);
 	void updateMembersMatcher(unsigned chatId, unsigned searchedId, GroupMemberUpdates type);
 	void changeGroupMembers(unsigned chatId, unsigned value);
+
 public:
+	MessageFileHandler messageFileHandler;
 	FileHandler* chatFileHandler;
 	FileHandler* membersFileHandler;
 	static GroupChatFileHandler& getInstance(const String& chatFile, const String& membersFile);
@@ -56,5 +60,6 @@ public:
 	void deleteMember(unsigned chatId, unsigned memberId);
 	int findMember(unsigned chatId, unsigned memberId);
 	void deleteGroupMembers(unsigned chatId);
+	void updateMessagesCount(unsigned chatId);
 
 };

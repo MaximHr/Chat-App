@@ -187,6 +187,7 @@ void CommandHandler::kickFromGroup() {
 	std::cout << "Member id: ";
 	unsigned memberId = getValidInfo<unsigned>();
 	system.kickFromGroup(chatId, memberId);
+	std::cout << "User kicked successfully" << '\n';
 }
 
 void CommandHandler::addToGroup() {
@@ -195,19 +196,24 @@ void CommandHandler::addToGroup() {
 	std::cout << "Member id: ";
 	unsigned memberId = getValidInfo<unsigned>();
 	system.addToGroup(chatId, memberId);
+	std::cout << "User added successfully" << '\n';
 }
 
 void CommandHandler::leaveGroup() {
 	std::cout << "Group chat id: ";
 	unsigned chatId = getValidInfo<unsigned>();
 	system.leaveGroup(chatId);
+	std::cout << "You left the chat successfully" << '\n';
 }
 
 void CommandHandler::messageIndividual() {
-	String name;
+	String name, message;
 	std::cout << "Username: ";
 	name = getValidInfo<String>();
-	system.messageIndividual(name);
+	unsigned chatId = system.messageIndividual(name);
+	message = enterMessage();
+	system.sendIndividualMessage(chatId, message);
+	std::cout << "message sent succefully" << '\n';
 }
 
 void CommandHandler::createGroup() {
@@ -239,6 +245,20 @@ void CommandHandler::createGroup() {
 	std::cout << "Group created successfully with an id of " << id << '\n';
 }
 
-void CommandHandler::selectChat() {
+const String CommandHandler::enterMessage() {
+	String message;
+	std::cout << "Enter message: ";
+	message = getValidInfo<String>();
+	return message;
+}
 
+void CommandHandler::selectChat() {
+	String message;
+	unsigned chatId;
+	std::cout << "Chat id: ";
+	chatId = getValidInfo<unsigned>();
+	system.printGroupMessages(chatId);
+	message = enterMessage();
+	system.sendGroupMessage(chatId, message);
+	std::cout << "message sent succefully" << '\n';
 }

@@ -24,6 +24,7 @@ class CommandHandler {
 	void createGroup();
 	void messageIndividual();
 	void selectChat();
+	const String enterMessage();
 public:
 	void start();
 	CommandHandler();

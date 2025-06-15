@@ -9,7 +9,6 @@
 System::System() : 
 	user(nullptr),
 	userFileHandler(UserFileHandler::getInstance(Config::getFile(0))),
-	messageFileHandler(MessageFileHandler::getInstance(Config::getFile(2))),
 	individualChatFileHandler(IndividualChatFileHandler::getInstance(Config::getFile(4))),
 	groupChatFileHandler(
 		GroupChatFileHandler::getInstance(Config::getFile(5), Config::getFile(6)) 
@@ -158,7 +157,7 @@ void System::leaveGroup(unsigned chatId) {
 	groupChatFileHandler.deleteMember(chatId, user->getId());
 }
 
-void System::messageIndividual(const String& name) {
+unsigned System::messageIndividual(const String& name) {
 	verifier.requireLogged(user);
 	const String names[2] = {name, user->getName()};
 	verifier.requireUniqueMembers(names, 2);
@@ -166,26 +165,54 @@ void System::messageIndividual(const String& name) {
 	User* reciever = userFileHandler.getUserByName(name);
 
 	int pos = individualChatFileHandler.findChat(user->getId(), reciever->getId());
-	
+	unsigned id;
 	//creates the chat if it doesnt exist
 	if(pos == -1) {
 		unsigned arr[2] = {user->getId(), reciever->getId()};
-		unsigned id = idContainer.getId(Config::getFile(4));
+		id = idContainer.getId(Config::getFile(4));
 		IndividualChat chat (
 			id, 
 			arr
 		);
 		individualChatFileHandler.saveChat(chat, *individualChatFileHandler.fileHandler);
-	};
+	} else {
+		id = individualChatFileHandler.getChatId(user->getId(), reciever->getId());
+	}
+	individualChatFileHandler.messageFileHandler.printMessages(id);
 
 	delete reciever;
-	idContainer.increment(Config::getFile(4)); 
+	idContainer.increment(Config::getFile(4));
+	
+	return id;
 }
 
+
+void System::sendGroupMessage(unsigned chatId, const String& messageText) {
+	verifier.requireLogged(user);
+	verifier.requireUserInChat(chatId, user->getId());
+
+	Message message(idContainer.getId(Config::getFile(2)), messageText, chatId, user->getId());
+	groupChatFileHandler.messageFileHandler.saveMessage(message, *groupChatFileHandler.messageFileHandler.fileHandler);
+	idContainer.increment(Config::getFile(2));
+	groupChatFileHandler.updateMessagesCount(chatId);
+}
+
+void System::printGroupMessages(unsigned chatId) {
+	groupChatFileHandler.messageFileHandler.printMessages(chatId);
+}
+
+void System::sendIndividualMessage(unsigned chatId, const String& messageText) {
+	verifier.requireLogged(user);
+
+	Message message(idContainer.getId(Config::getFile(7)), messageText, chatId, user->getId());
+	individualChatFileHandler.messageFileHandler.saveMessage(message, *individualChatFileHandler.messageFileHandler.fileHandler);
+	idContainer.increment(Config::getFile(7));
+}
 
 void System::viewAllChats() {
 	verifier.requireLogged(user);
 	verifier.requireAdmin(user);
+	
 }
 
 void System::viewChats() {

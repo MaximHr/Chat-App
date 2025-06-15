@@ -6,7 +6,7 @@
 #include "GroupChatFileHandler.h"
 #include "../../Components/Chats/GroupChat.h"
 
-GroupChatFileHandler::GroupChatFileHandler(const String& chatFile, const String& membersFile) {
+GroupChatFileHandler::GroupChatFileHandler(const String& chatFile, const String& membersFile) : messageFileHandler(Config::getFile(2)){
 	chatFileHandler = FileFactory::createFileHandler(Config::fileExtension);
 	chatFileHandler->open(chatFile);
 
@@ -106,6 +106,9 @@ void GroupChatFileHandler::updateChatMatcher(unsigned id, unsigned adminId, Grou
 			} else if(type == GroupChatUpdates::changeMembersCount) {
 				chat.incrementMembersCount(value);
 				saveChat(chat, *output);
+			} else if(type == GroupChatUpdates::changeMessagesCount) {
+				chat.incrementMessagesCount();
+				saveChat(chat, *output);
 			}
 		}
 		chat = readChat(bytes);
@@ -117,6 +120,10 @@ void GroupChatFileHandler::updateChatMatcher(unsigned id, unsigned adminId, Grou
 	if(index < chatFileHandler->getFileSize()) {
 		chatFileHandler->file.seekg(index);
 	}
+}
+
+void GroupChatFileHandler::updateMessagesCount(unsigned chatId) {
+	updateChatMatcher(chatId, 0, GroupChatUpdates::changeMessagesCount, 1);
 }
 
 void GroupChatFileHandler::changeGroupMembers(unsigned chatId, unsigned value) {

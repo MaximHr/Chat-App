@@ -12,11 +12,12 @@ const FileExtension Config::fileExtension = FileExtension::txt;
 const String Config::fileNames[Config::numberOfFiles] = {
 	"users",
 	"ids",
-	"messages",
+	"group_messages",
 	"temp",
 	"individual_chats",
 	"group_chats",
 	"group_members",
+	"individual_messages",
 };
 
 const String Config::getFileExtension() {

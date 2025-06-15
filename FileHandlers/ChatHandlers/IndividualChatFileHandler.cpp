@@ -1,7 +1,7 @@
 #include "IndividualChatFileHandler.h"
 #include "../../Components/Chats/IndividualChat.h"
 
-IndividualChatFileHandler::IndividualChatFileHandler(const String& str) {
+IndividualChatFileHandler::IndividualChatFileHandler(const String& str) : messageFileHandler(Config::getFile(7)) {
 	fileHandler = FileFactory::createFileHandler(Config::fileExtension);
 	fileHandler->open(str);
 }
@@ -26,9 +26,9 @@ void IndividualChatFileHandler::saveChat(const IndividualChat& chat, FileHandler
 	fs.write(chat.getMessagesCount());
 	fs.file.flush();
 }
-
-int IndividualChatFileHandler::findChat(unsigned user1Id, unsigned user2Id) {
-	if(!fileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
+	
+int IndividualChatFileHandler::findChatMatcher(unsigned user1Id, unsigned user2Id, bool shouldGetId) {
+if(!fileHandler->isOpen()) throw std::runtime_error("file cannot be opened");
 	if(fileHandler->getFileSize() == 0) return -1;
 
 	int index = fileHandler->setAtBeginning();
@@ -42,6 +42,9 @@ int IndividualChatFileHandler::findChat(unsigned user1Id, unsigned user2Id) {
 	{
 		if(fileHandler->file.eof()) {
 			fileHandler->file.clear();
+			if(shouldGetId) {
+				return chat.getId();
+			}
 			return -1;
 		}
 		result = fileHandler->file.tellg();
@@ -50,7 +53,18 @@ int IndividualChatFileHandler::findChat(unsigned user1Id, unsigned user2Id) {
 
 	fileHandler->file.clear();
 	fileHandler->file.seekg(index);
+	if(shouldGetId) {
+		return chat.getId();
+	}
 	return result;
+}
+
+int IndividualChatFileHandler::getChatId(unsigned user1Id, unsigned user2Id) {
+	return findChatMatcher(user1Id, user2Id, true);
+}
+
+int IndividualChatFileHandler::findChat(unsigned user1Id, unsigned user2Id) {
+	return findChatMatcher(user1Id, user2Id, false);
 }
 
 IndividualChat IndividualChatFileHandler::readChat() {
